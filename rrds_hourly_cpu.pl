@@ -13,22 +13,22 @@ if(-f "load.rrd"){
 	unlink "load.rrd" or print "Unable to delete load.rrd: $!";
 }
 RRDs::create($rrd, "-s 60", "DS:load:GAUGE:120:0:8", "RRA:AVERAGE:0.9:1:60");
-
 $value = 0;
+
 while(){
 	my $cur_time = time();
 	my $end_time = $cur_time;
 	my $start_time = $end_time - 1800;
 	open (STAT,"/proc/loadavg") or die "Cannot open /proc/loadavg";
+
 	while(<STAT>){
 		my @cpu = split /\s+/, $_;
 		$value = $cpu[0];
 	}
 
-	#$value = $cpu[0];
-	RRDs::update($rrd, "N:$value") or die "Cannot update RRD";
+	RRDs::update("-daemon", "unix:/tmp/rrdcached.sock", $rrd, "N:$value") or die "Cannot update RRD\n";
 	my $err=RRDs::error;
-	print "$err\n" if $err;
+		print "$err\n" if $err;
 
 	close STAT;
 
