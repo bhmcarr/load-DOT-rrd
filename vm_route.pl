@@ -59,6 +59,10 @@ get '/' => sub {
 	send_file 'index.html';
 };
 
+get '/canvas' => sub { 
+	send_file 'canvas.html';
+};
+
  
 post '/add' => sub {
        if ( not session('logged_in') ) {

@@ -17,8 +17,8 @@ $value = 0;
 
 while(){
 	my $cur_time = time();
-	my $end_time = $cur_time;
-	my $start_time = $end_time - 1800;
+	my $end_time = $cur_time - 60;
+	my $start_time = $end_time - 3600;
 	open (STAT,"/proc/loadavg") or die "Cannot open /proc/loadavg";
 
 	while(<STAT>){
@@ -26,7 +26,7 @@ while(){
 		$value = $cpu[0];
 	}
 
-	RRDs::update("-daemon", "unix:/tmp/rrdcached.sock", $rrd, "N:$value") or die "Cannot update RRD\n";
+	RRDs::update($rrd, "--daemon", "unix:/tmp/rrdcached.sock", "N:$value");
 	my $err=RRDs::error;
 		print "$err\n" if $err;
 
@@ -36,7 +36,7 @@ while(){
 
 	RRDs::graph("$rrd_graph",
 				"--width", "710",
-				"--height" , "1000",
+				"--height" , "300",
 				"--start", "$start_time",
 				"--end", "$end_time",
 				"--lower-limit", "0",

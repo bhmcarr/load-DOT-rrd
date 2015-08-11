@@ -1,0 +1,22 @@
+<HTML>
+	<HEAD>
+		<TITLE>Canvas Mucking</TITLE>
+		<SCRIPT>
+			function draw() {
+				var canvas = document.getElementById("canvas");
+				if(canvas.getContext) {
+					var ctx = canvas.getContext("2d");
+					
+					var path = new Path2D();
+					path.moveTo(75,50);
+					path.lineTo(75,25);
+					path.lineTo(100,37.5);
+					ctx.fill(path);
+				}
+			}
+		</SCRIPT>
+	</HEAD>
+	<BODY onload="draw();">
+		<canvas id="canvas" width="150" height="150"></canvas>
+	</BODY>
+</HTML>
