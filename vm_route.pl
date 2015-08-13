@@ -63,6 +63,10 @@ get '/canvas' => sub {
 	send_file 'canvas.html';
 };
 
+get '/json' => sub {
+	send_file 'data_out.json';
+};
+
  
 post '/add' => sub {
        if ( not session('logged_in') ) {

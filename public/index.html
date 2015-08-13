@@ -3,9 +3,95 @@
 <TITLE>Load Graph</TITLE>
 </HEAD>
 
-<BODY>
+<BODY onload="draw();">
+	<h1>load.rrd</h1>
+	<h3 id="cycle"></h2>
+	<a href="/canvas">Canvas Stuff</a>
+	<a href="/json">View raw JSON</a>
+	<hr>
 	<p>This graph is updated with this web server's hourly cpu load average. The value is pulled from this server's /proc/, and is updated every five minutes with the last five minutes' worth of data.</p>
 	<img src="../graph/load_graph.png"><br>
-	<a href="/canvas">Canvas Stuff</a>
+	
+	<br>
+	<p>This is a graph rendered using HTML5's canvas object feature. It's currently a work in progress.</p>
+	<canvas id="canvas" width="800" height="300"></canvas>
+	<p>JSON DATA:</p>
 </BODY>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<SCRIPT type="text/javascript">
+
+function draw() {
+	var canvas = document.getElementById('canvas');
+	if (canvas.getContext) {
+		var ctx = canvas.getContext('2d');
+		
+		// set up the axis
+		
+		ctx.fillStyle="#E6E6FF";
+		ctx.fillRect(0,0,800,300);
+		ctx.strokeRect(0,0,800,300);
+		
+		var path=new Path2D();
+		ctx.beginPath();
+		path.moveTo(65,25);
+		path.lineTo(65,265);
+		
+		path.moveTo(65,265);
+		path.lineTo(775,265);
+		ctx.stroke(path);
+		
+		ctx.beginPath();
+		ctx.lineWidth=0.5;
+		path.moveTo(65,30);
+		path.lineTo(770,30);
+
+		path.moveTo(770,30);
+		path.lineTo(770,265);
+		ctx.stroke(path);
+		ctx.beginPath();
+		ctx.strokeStyle="red";
+	}
+
+		$(document).ready(function(){
+			$.getJSON("/json", function(data) {
+				var items = [];
+
+				$.each( data, function(key,val){
+					items.push( "<li id='" + key + "->" + val + "</li>" );
+				});
+		
+				$( "<ul/>", {
+					"class": "my-new-list",
+					html: items.join("")
+				}).appendTo("body");
+			});
+		});
+		$.getJSON("/json",function(data) {
+			var points = [];
+
+			$.each( data, function(key,val){
+				points.push(val);
+			});
+			path.moveTo(65,265);
+			for (i = 0; i < points.length; i++){
+				points[i] = points[i] * 50;
+				path.lineTo(65+i*11.75,points[i]+200);
+				path.moveTo(65+i*11.75,points[i]+200);
+			}	
+			ctx.stroke(path);
+		});
+}
+</SCRIPT>
+<SCRIPT>
+	// random phrase
+	var phrase_array = [];
+	phrase_array[0] = "A thing that may or may not work";
+	phrase_array[1] = "'I am so irritated.'";
+	phrase_array[2] = "Will not break anything*";
+
+	var rand_index = Math.floor(Math.random() * 3);
+	document.getElementById("cycle").innerHTML = phrase_array[rand_index];
+</SCRIPT>
+
 </HTML>

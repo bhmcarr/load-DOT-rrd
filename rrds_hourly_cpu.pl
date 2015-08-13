@@ -17,7 +17,7 @@ $value = 0;
 
 while(){
 	my $cur_time = time();
-	my $end_time = $cur_time - 60;
+	my $end_time = $cur_time;
 	my $start_time = $end_time - 3600;
 	open (STAT,"/proc/loadavg") or die "Cannot open /proc/loadavg";
 
