@@ -13,11 +13,14 @@
 	<img src="../graph/load_graph.png"><br>
 	
 	<br>
-	<p>This is a graph rendered using HTML5's canvas object feature. It's currently a work in progress.</p>
+	<p>This is a graph rendered using HTML5's canvas object feature. A spooler script periodically pulls data from the RRD and exports it into a JSON file. A Javascript function in this web page then pulls that data from the file and uses it to draw this graph in a canvas element. It's currently a work in progress.</p>
 	<canvas id="canvas" width="800" height="300"></canvas>
+	<p>This is a chart generated using "Chart.js". You can find the source code for that jazz <a href="https://github.com/nnnick/Chart.js">here</a>.</p> <br>
+	<canvas id="chart" width="800" height="400"></canvas>
 	<p>JSON DATA:</p>
 </BODY>
 
+<script src="Chart.js/Chart.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <SCRIPT type="text/javascript">
 
@@ -28,9 +31,13 @@ function draw() {
 		
 		// set up the axis
 		
-		ctx.fillStyle="#E6E6FF";
+		ctx.fillStyle="#EEF1FC";
 		ctx.fillRect(0,0,800,300);
+		ctx.clearRect(65,30,705,235);
 		ctx.strokeRect(0,0,800,300);
+
+		ctx.font = "20px Arial";
+		ctx.fillText("CPU Load Average",325,55);
 		
 		var path=new Path2D();
 		ctx.beginPath();
@@ -39,6 +46,7 @@ function draw() {
 		
 		path.moveTo(65,265);
 		path.lineTo(775,265);
+		ctx.closePath(path);
 		ctx.stroke(path);
 		
 		ctx.beginPath();
@@ -48,6 +56,7 @@ function draw() {
 
 		path.moveTo(770,30);
 		path.lineTo(770,265);
+		ctx.strokeStyle="#000000";
 		ctx.stroke(path);
 		ctx.beginPath();
 		ctx.strokeStyle="red";
@@ -76,10 +85,39 @@ function draw() {
 			path.moveTo(65,265);
 			for (i = 0; i < points.length; i++){
 				points[i] = points[i] * 50;
-				path.lineTo(65+i*11.75,points[i]+200);
-				path.moveTo(65+i*11.75,points[i]+200);
+				path.lineTo(65+i*11,points[i]+235);
+				path.moveTo(65+i*11,points[i]+235);
 			}	
 			ctx.stroke(path);
+		});
+
+		$.getJSON("/json", function(data) {
+			var points = [];
+			var test_labels = [];
+			test_labels.length = 30;
+			for (i=0; i < test_labels.length; i++){
+				test_labels[i] = i;
+			}
+			$.each( data, function(key,val){
+				points.push(val);
+			});
+			var data = {
+				labels: test_labels,
+				datasets: [
+					{
+						label: "CPU Load Average",
+						fillColor: "rgba(151,187,205,1)",
+						strokeColor: "rgba(0,0,0,1)",
+						pointColor: "rgba(0,0,0,1)",
+						pointStrokeColor: "#000",
+						pointHighlightFill: "#fff",
+						pointHighlightStroke: "rgba(220,220,220,1)",
+						data: points
+					}
+				]
+			};
+			var ctx = document.getElementById("chart").getContext("2d");
+			var chart = new Chart(ctx).Line(data);
 		});
 }
 </SCRIPT>
@@ -89,8 +127,8 @@ function draw() {
 	phrase_array[0] = "A thing that may or may not work";
 	phrase_array[1] = "'I am so irritated.'";
 	phrase_array[2] = "Will not break anything*";
-
-	var rand_index = Math.floor(Math.random() * 3);
+	phrase_array[3] = "Exactly the same as prod";
+	var rand_index = Math.floor(Math.random() * 4);
 	document.getElementById("cycle").innerHTML = phrase_array[rand_index];
 </SCRIPT>
 
