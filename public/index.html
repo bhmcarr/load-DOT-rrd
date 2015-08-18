@@ -74,8 +74,32 @@ function draw() {
 		c.font = 'italic 8pt sans-serif';
 		c.textAlign = "center";
 
+		// draw the border
+		c.beginPath();
+		c.strokeStyle= "#000";
+		c.rect(1,1,799,299);
+		c.stroke();
+
+
+		// draw the grid
+		c.beginPath();
+		for(var i = 0.5; i < 800; i += 10){
+			c.moveTo(i, 0);
+			c.lineTo(i, 300);
+		}
+		c.strokeStyle="#eee";
+		c.stroke();
+
+		c.beginPath();
+		for(var i = 0.5; i < 300; i += 10){
+			c.moveTo(0, i);
+			c.lineTo(800, i);
+		}
+		c.stroke();
+
 		// draw the axis
 		c.beginPath();
+		c.strokeStyle="#000";
 		c.moveTo(xPadding,0);
 		c.lineTo(xPadding, graph.height() - yPadding);
 		c.lineTo(graph.width(), graph.height() - yPadding);
@@ -94,15 +118,18 @@ function draw() {
 		}
 		
 		// plot the data
-		c.strokeStyle = '#f00';
+		c.strokeStyle = '#FF7E5E';
 		c.beginPath();
 		c.moveTo(getXPixel(0), getYPixel(json_data[0]));
 
 		for(var i = 1; i < json_data.length; i++){
 			c.lineTo(getXPixel(i), getYPixel(json_data[i]));
 		}
+		c.lineTo(800,300-yPadding);
+		c.closePath();
 		c.stroke();
-
+		c.fillStyle="#FF7E5E";
+		c.fill();
 	}
   });
  });
