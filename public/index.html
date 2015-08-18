@@ -9,7 +9,7 @@
 	<a href="/canvas">Canvas Stuff</a>
 	<a href="/json">View raw JSON</a>
 	<hr>
-	<p>This graph is updated with this web server's hourly cpu load average. The value is pulled from this server's /proc/, and is updated every five minutes with the last five minutes' worth of data.</p>
+	<p>This graph is updated with this web server's hourly cpu load averages. The values are pulled from this server's /proc/, and are updated every five minutes with the last five minutes' worth of data.</p>
 	<img src="../graph/load_graph.png"><br>
 	
 	<br>
@@ -17,7 +17,6 @@
 	<canvas id="canvas" width="800" height="300"></canvas>
 	<p>This is a chart generated using "Chart.js". You can find the source code for that jazz <a href="https://github.com/nnnick/Chart.js">here</a>.</p> <br>
 	<canvas id="chart" width="800" height="400"></canvas>
-	<p>JSON DATA:</p>
 </BODY>
 
 <script src="Chart.js/Chart.js"></script>
@@ -25,76 +24,93 @@
 <SCRIPT type="text/javascript">
 
 function draw() {
-	var canvas = document.getElementById('canvas');
-	if (canvas.getContext) {
-		var ctx = canvas.getContext('2d');
-		
-		// set up the axis
-		
-		ctx.fillStyle="#EEF1FC";
-		ctx.fillRect(0,0,800,300);
-		ctx.clearRect(65,30,705,235);
-		ctx.strokeRect(0,0,800,300);
 
-		ctx.font = "20px Arial";
-		ctx.fillText("CPU Load Average",325,55);
-		
-		var path=new Path2D();
-		ctx.beginPath();
-		path.moveTo(65,25);
-		path.lineTo(65,265);
-		
-		path.moveTo(65,265);
-		path.lineTo(775,265);
-		ctx.closePath(path);
-		ctx.stroke(path);
-		
-		ctx.beginPath();
-		ctx.lineWidth=0.5;
-		path.moveTo(65,30);
-		path.lineTo(770,30);
+	$(document).ready(function(){
+		$.getJSON("/json",function(data){
+			var json_data = [];
+			var temp;
+			$.each(data, function(key,val){
+				temp = val * 10;	// scale the data because we can't have 1/4th of a pixel etc.
+				json_data.push(temp);
+			});
 
-		path.moveTo(770,30);
-		path.lineTo(770,265);
-		ctx.strokeStyle="#000000";
-		ctx.stroke(path);
-		ctx.beginPath();
-		ctx.strokeStyle="red";
+		
+	function getMaxY() {
+		var max = 0;
+
+		for(var i = 0; i < json_data.length; i++){
+			if(json_data[i] > max){
+				max = json_data[i];
+			}
+		}	
+
+		max +=10 - max % 10;
+		return max;
 	}
 
-		$(document).ready(function(){
-			$.getJSON("/json", function(data) {
-				var items = [];
 
-				$.each( data, function(key,val){
-					items.push( "<li id='" + key + "->" + val + "</li>" );
-				});
+	function getXPixel(val){
+		return ((graph.width() - xPadding) / json_data.length) * val + (xPadding * 1.5);
+	}
+
+	function getYPixel(val){
+		return graph.height() - (((graph.height() - yPadding) / getMaxY()) * val) - yPadding;
+	}
+	
+	var canvas = document.getElementById('canvas');
+
+	if (canvas.getContext) {
+
+		// misc setup
+		var graph;
+		var xPadding = 30;
+		var yPadding = 30;
 		
-				$( "<ul/>", {
-					"class": "my-new-list",
-					html: items.join("")
-				}).appendTo("body");
-			});
-		});
-		$.getJSON("/json",function(data) {
-			var points = [];
+		graph = $('#canvas');
+		var c = graph[0].getContext('2d');
+		
+		c.lineWidth = 1;
+		c.strokeStyle = '#333';
+		c.font = 'italic 8pt sans-serif';
+		c.textAlign = "center";
 
-			$.each( data, function(key,val){
-				points.push(val);
-			});
-			path.moveTo(65,265);
-			for (i = 0; i < points.length; i++){
-				points[i] = points[i] * 50;
-				path.lineTo(65+i*11,points[i]+235);
-				path.moveTo(65+i*11,points[i]+235);
-			}	
-			ctx.stroke(path);
-		});
+		// draw the axis
+		c.beginPath();
+		c.moveTo(xPadding,0);
+		c.lineTo(xPadding, graph.height() - yPadding);
+		c.lineTo(graph.width(), graph.height() - yPadding);
+		c.stroke();
+		
+		// draw the x labels
+		for(var i=0; i < json_data.length; i+= 10){
+			c.fillText(i, getXPixel(i), graph.height() - yPadding + 20);
+		}
 
-		$.getJSON("/json", function(data) {
+		// draw the y labels
+		c.textAlign = "right";
+		c.textBaseline = "middle";
+		for(var i=0; i < getMaxY(); i+=10){
+			c.fillText(i, xPadding - 10, getYPixel(i));
+		}
+		
+		// plot the data
+		c.strokeStyle = '#f00';
+		c.beginPath();
+		c.moveTo(getXPixel(0), getYPixel(json_data[0]));
+
+		for(var i = 1; i < json_data.length; i++){
+			c.lineTo(getXPixel(i), getYPixel(json_data[i]));
+		}
+		c.stroke();
+
+	}
+  });
+ });
+}	
+$.getJSON("/json", function(data) {
 			var points = [];
 			var test_labels = [];
-			test_labels.length = 30;
+			test_labels.length = 60;
 			for (i=0; i < test_labels.length; i++){
 				test_labels[i] = i;
 			}
@@ -108,18 +124,18 @@ function draw() {
 						label: "CPU Load Average",
 						fillColor: "rgba(151,187,205,1)",
 						strokeColor: "rgba(0,0,0,1)",
-						pointColor: "rgba(0,0,0,1)",
-						pointStrokeColor: "#000",
-						pointHighlightFill: "#fff",
-						pointHighlightStroke: "rgba(220,220,220,1)",
+						//pointColor: "rgba(0,0,0,1)",
+						//pointStrokeColor: "#000",
+						//pointHighlightFill: "#fff",
+						//pointHighlightStroke: "rgba(220,220,220,1)",
 						data: points
 					}
 				]
 			};
 			var ctx = document.getElementById("chart").getContext("2d");
 			var chart = new Chart(ctx).Line(data);
-		});
-}
+});
+
 </SCRIPT>
 <SCRIPT>
 	// random phrase
@@ -128,7 +144,8 @@ function draw() {
 	phrase_array[1] = "'I am so irritated.'";
 	phrase_array[2] = "Will not break anything*";
 	phrase_array[3] = "Exactly the same as prod";
-	var rand_index = Math.floor(Math.random() * 4);
+	phrase_array[4] = "'I'm going to have to reject this for now.'";
+	var rand_index = Math.floor(Math.random() * 5);
 	document.getElementById("cycle").innerHTML = phrase_array[rand_index];
 </SCRIPT>
 
