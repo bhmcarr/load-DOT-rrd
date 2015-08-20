@@ -1,20 +1,34 @@
 <HTML>
 <HEAD>
-<TITLE>Load Graph</TITLE>
+<TITLE>load.rrd</TITLE>
+<LINK rel="stylesheet" type="text/css" href="style.css"></LINK>
 </HEAD>
 
 <BODY onload="draw();">
 	<h1>load.rrd</h1>
 	<h3 id="cycle"></h2>
-	<a href="/canvas">Canvas Stuff</a>
-	<a href="/json">View raw JSON</a>
+	
+	<div id="#sidebar">
+		<p>test test test</p>
+	</div>
+
+	<div id="toplinks">
+		<a href="/canvas">Canvas Stuff</a>
+		<a href="/json">View raw JSON</a>
+		<a href="http://github.com/bhmcarr">GitHub</a>
+	</div>
+
+	<img style="float:right" src="moogle2.gif" title="KUPO!!">
 	<hr>
+	<h2>RRDTool</h2>
 	<p>This graph is updated with this web server's hourly cpu load averages. The values are pulled from this server's /proc/, and are updated every five minutes with the last five minutes' worth of data.</p>
 	<img src="../graph/load_graph.png"><br>
 	
 	<br>
+	<h2>Canvas</h2>
 	<p>This is a graph rendered using HTML5's canvas object feature. A spooler script periodically pulls data from the RRD and exports it into a JSON file. A Javascript function in this web page then pulls that data from the file and uses it to draw this graph in a canvas element. It's currently a work in progress.</p>
 	<canvas id="canvas" width="800" height="300"></canvas>
+	<h2>Chart.js</h2>
 	<p>This is a chart generated using "Chart.js". You can find the source code for that jazz <a href="https://github.com/nnnick/Chart.js">here</a>.</p> <br>
 	<canvas id="chart" width="800" height="400"></canvas>
 </BODY>
@@ -69,6 +83,10 @@ function draw() {
 		graph = $('#canvas');
 		var c = graph[0].getContext('2d');
 		
+		// draw the background
+		c.fillStyle= "#FFFFFF";
+		c.fillRect(0,0,800,300);
+
 		c.lineWidth = 1;
 		c.strokeStyle = '#333';
 		c.font = 'italic 8pt sans-serif';
@@ -79,7 +97,6 @@ function draw() {
 		c.strokeStyle= "#000";
 		c.rect(1,1,799,299);
 		c.stroke();
-
 
 		// draw the grid
 		c.beginPath();
@@ -106,6 +123,7 @@ function draw() {
 		c.stroke();
 		
 		// draw the x labels
+		c.fillStyle="black";
 		for(var i=0; i < json_data.length; i+= 10){
 			c.fillText(i, getXPixel(i), graph.height() - yPadding + 20);
 		}
@@ -118,7 +136,7 @@ function draw() {
 		}
 		
 		// plot the data
-		c.strokeStyle = '#FF7E5E';
+		c.strokeStyle = '#000000';
 		c.beginPath();
 		c.moveTo(getXPixel(0), getYPixel(json_data[0]));
 
@@ -128,7 +146,8 @@ function draw() {
 		c.lineTo(800,300-yPadding);
 		c.closePath();
 		c.stroke();
-		c.fillStyle="#FF7E5E";
+		c.fillStyle="#7070FF";
+		c.globalAlpha=0.5;
 		c.fill();
 	}
   });
@@ -138,6 +157,7 @@ $.getJSON("/json", function(data) {
 			var points = [];
 			var test_labels = [];
 			test_labels.length = 60;
+			
 			for (i=0; i < test_labels.length; i++){
 				test_labels[i] = i;
 			}
