@@ -1,4 +1,4 @@
-# rrd_exper
-Various RRD scripts that I feel are useful for personal data analysis.
+# load.rrd
+A collection of perl scripts to collect, organize, and chart your CPU load average.
 
-Trying to get stuff pushed to rrd cache daemon. That's up next.
+Documentation coming eventually.

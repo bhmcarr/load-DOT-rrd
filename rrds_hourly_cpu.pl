@@ -40,7 +40,7 @@ while(){
 				"--start", "$start_time",
 				"--end", "$end_time",
 				"--lower-limit", "0",
-				"--upper-limit", "8",
+				#"--upper-limit", "8", #remove upper limit
 				"--title= CPU Load",
 				"--vertical-label= load value",
 				"DEF:load=$rrd:load:AVERAGE",
